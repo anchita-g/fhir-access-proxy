@@ -190,8 +190,8 @@ public class ListAccessChecker implements AccessChecker {
       }
       return NoOpAccessDecision.accessDenied();
     }
-    String patientId = patientFinder.findPatientFromParams(requestDetails);
-    return new NoOpAccessDecision(serverListIncludesAnyPatient(Sets.newHashSet(patientId)));
+    Set<String> patientIds = patientFinder.findPatientFromParams(requestDetails);
+    return new NoOpAccessDecision(serverListIncludesAnyPatient(patientIds));
   }
 
   private AccessDecision processPost(RequestDetailsReader requestDetails) {
@@ -238,8 +238,8 @@ public class ListAccessChecker implements AccessChecker {
     // TODO(https://github.com/google/fhir-access-proxy/issues/63):Support direct resource deletion.
 
     // There should be a patient id in search params; the param name is based on the resource.
-    String patientId = patientFinder.findPatientFromParams(requestDetails);
-    return new NoOpAccessDecision(serverListIncludesAnyPatient(Sets.newHashSet(patientId)));
+    Set<String> patientIds = patientFinder.findPatientFromParams(requestDetails);
+    return new NoOpAccessDecision(serverListIncludesAnyPatient(patientIds));
   }
 
   private AccessDecision checkNonPatientAccessInUpdate(
@@ -249,10 +249,10 @@ public class ListAccessChecker implements AccessChecker {
         "Expected either PATCH or PUT!");
 
     // We do not allow direct resource PUT/PATCH, so Patient ID must be returned
-    String patientId = patientFinder.findPatientFromParams(requestDetails);
+    Set<String> patientIds = patientFinder.findPatientFromParams(requestDetails);
     Set<String> patientQueries = Sets.newHashSet();
     // Escaping is not needed here as the set elements will be escaped later.
-    patientQueries.add(String.format("Patient/%s", patientId));
+    patientIds.forEach(patientId -> patientQueries.add(String.format("Patient/%s", patientId)));
 
     Set<String> patientSet = Sets.newHashSet();
     if (updateMethod == RequestTypeEnum.PATCH) {

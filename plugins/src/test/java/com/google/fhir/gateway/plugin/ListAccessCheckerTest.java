@@ -274,6 +274,20 @@ public class ListAccessCheckerTest extends AccessCheckerTestBase {
   }
 
   @Test
+  public void canAccessPatientsInBatch() throws IOException {
+    // Query: GET /Patient?_id=id1,id2
+    when(requestMock.getResourceName()).thenReturn("Patient");
+    when(requestMock.getParameters())
+        .thenReturn(Map.of("_id", new String[] {PATIENT_AUTHORIZED, PATIENT_NON_AUTHORIZED}));
+    when(requestMock.getRequestType()).thenReturn(RequestTypeEnum.GET);
+    AccessChecker testInstance = getInstance();
+    setUpFhirListSearchMock(
+        "item=Patient%2F" + PATIENT_AUTHORIZED + "%2CPatient%2F" + PATIENT_NON_AUTHORIZED,
+        "bundle_list_patient_item.json");
+    assertThat(testInstance.checkAccess(requestMock).canAccess(), equalTo(true));
+  }
+
+  @Test
   public void canAccessDeletePatient() throws IOException {
     when(requestMock.getResourceName()).thenReturn("Patient");
     when(requestMock.getRequestType()).thenReturn(RequestTypeEnum.DELETE);

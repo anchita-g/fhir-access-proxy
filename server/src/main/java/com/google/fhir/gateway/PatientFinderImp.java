@@ -44,8 +44,10 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
@@ -177,7 +179,7 @@ public final class PatientFinderImp implements PatientFinder {
   }
 
   @Override
-  public String findPatientFromParams(RequestDetailsReader requestDetails) {
+  public Set<String> findPatientFromParams(RequestDetailsReader requestDetails) {
     String resourceName = requestDetails.getResourceName();
     if (resourceName == null) {
       ExceptionUtil.throwRuntimeExceptionAndLog(
@@ -185,10 +187,9 @@ public final class PatientFinderImp implements PatientFinder {
           "No resource specified for request " + requestDetails.getRequestPath(),
           InvalidRequestException.class);
     }
-    // Note we only let fetching data for one patient in each query; we may want to revisit this
-    // if we need to batch multiple patients together in one query.
+
     if (FhirUtil.isSameResourceType(resourceName, ResourceType.Patient)) {
-      return FhirUtil.getIdOrNull(requestDetails);
+      return findPatientIdsInPatientResourceUrl(requestDetails);
     }
     if (FhirUtil.getIdOrNull(requestDetails) != null) {
       // Block any direct, non-patient resource fetches (e.g. Encounter/EID).
@@ -208,7 +209,18 @@ public final class PatientFinderImp implements PatientFinder {
           "Patient ID cannot be found in " + requestDetails.getCompleteUrl(),
           InvalidRequestException.class);
     }
-    return patientId;
+    return Set.of(patientId);
+  }
+
+  private Set<String> findPatientIdsInPatientResourceUrl(RequestDetailsReader requestDetails) {
+    if (FhirUtil.getIdOrNull(requestDetails) != null) {
+      return Set.of(Objects.requireNonNull(FhirUtil.getIdOrNull(requestDetails)));
+    }
+    Map<String, String[]> queryParams = requestDetails.getParameters();
+    if (queryParams.containsKey("_id")) {
+      return Set.of(queryParams.get("_id"));
+    }
+    return Collections.emptySet();
   }
 
   private IBaseResource createResourceFromRequest(RequestDetailsReader request) {

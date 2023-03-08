@@ -29,7 +29,7 @@ public interface PatientFinder {
    * @throws InvalidRequestException for various reasons when unexpected parameters or content are
    *     encountered. Callers are expected to deny access when this happens.
    */
-  String findPatientFromParams(RequestDetailsReader requestDetails);
+  Set<String> findPatientFromParams(RequestDetailsReader requestDetails);
 
   /**
    * Find all patients referenced or updated in a Bundle.
