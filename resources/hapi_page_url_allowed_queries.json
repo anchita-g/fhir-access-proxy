@@ -7,6 +7,22 @@
       },
       "allowExtraParams": true,
       "allParamsRequired": true
+    },
+    {
+      "path": "Practitioner",
+      "queryParams": {
+        "_id": "ANY_VALUE"
+      },
+      "allowExtraParams": false,
+      "allParamsRequired": true
+    },
+    {
+      "path": "Organization",
+      "queryParams": {
+        "_id": "ANY_VALUE"
+      },
+      "allowExtraParams": false,
+      "allParamsRequired": true
     }
   ]
 }

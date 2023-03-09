@@ -282,6 +282,9 @@ public class ListAccessCheckerTest extends AccessCheckerTestBase {
     when(requestMock.getRequestType()).thenReturn(RequestTypeEnum.GET);
     AccessChecker testInstance = getInstance();
     setUpFhirListSearchMock(
+        "item=Patient%2F" + PATIENT_NON_AUTHORIZED + "%2CPatient%2F" + PATIENT_AUTHORIZED,
+        "bundle_list_patient_item.json");
+    setUpFhirListSearchMock(
         "item=Patient%2F" + PATIENT_AUTHORIZED + "%2CPatient%2F" + PATIENT_NON_AUTHORIZED,
         "bundle_list_patient_item.json");
     assertThat(testInstance.checkAccess(requestMock).canAccess(), equalTo(true));
